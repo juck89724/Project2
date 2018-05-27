@@ -7,9 +7,15 @@ class Integer :public NumberObject
 {
 public:
 	Integer() :
-		NumberObject::NumberObject() {};
+		NumberObject::NumberObject() { setName("Integer"); };
 	Integer(string calculate) :
-		NumberObject::NumberObject(calculate) {};
+		NumberObject::NumberObject(calculate) { setName("Integer"); };
+	Integer(string numberator, string denominator) :
+		NumberObject(numberator, denominator)
+	{
+		setName("Integer");
+	};
 	~Integer();
+	void print() { cout << "this is Integer"; };
 private:
 };
