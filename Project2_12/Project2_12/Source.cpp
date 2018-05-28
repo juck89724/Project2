@@ -7,18 +7,15 @@
 #include "NumberObject.h"
 using namespace std;
 
-#define MAX 1000
+#define MAX 10000
 
 vector<NumberObject*> num;
 int main()
 {
-
 	string line;
-	Integer int1("1");
-	Decimal dec1("7");
-	NumberObject number = int1 + dec1;
-	NumberObject mnumber = int1 * dec1;
-	NumberObject dmnumber = int1 / dec1;
+	Integer i1("20");
+	Decimal d1("20.5");
+	NumberObject n1 = i1 ^ d1;
 	while (getline(cin, line))
 	{
 		stringstream ss;
@@ -36,18 +33,11 @@ int main()
 		}
 		else
 		{
-			vector<string> infix;
-			vector<string> postfix;
-
+			char *postfix = new char[MAX] {'\0'};
 			string s;
 			int counter = 0;
-			while (ss >> s)
-			{
-				infix.push_back(s);
-				counter++;
-			}
-			inToPostfix(infix, postfix);
-			for (int i = 0; i < postfix.size(); i++)
+			inToPostfix(line.c_str(), postfix);
+			/*for (int i = 0; i < postfix.size(); i++)
 			{
 				string s= postfix[i];
 				NumberObject *result=new NumberObject();
@@ -76,7 +66,8 @@ int main()
 					newNumber->print();
 					num.push_back(newNumber);
 				}
-			}
+			}*/
 		}
 	}
+	
 }

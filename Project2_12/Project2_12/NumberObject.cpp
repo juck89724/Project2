@@ -1,5 +1,14 @@
 #include "NumberObject.h"
 
+bool checkSign(NumberObject number)
+{
+	if (number.getSign() == "-")
+	{
+		return false;
+	}
+	return true;
+};
+
 
 NumberObject::NumberObject()
 {
@@ -9,23 +18,27 @@ NumberObject::NumberObject()
 NumberObject::NumberObject(string calculate)
 {
 	this->calculate = calculate;
+	if (!check(calculate)) sign = "-";
 	if (calculate.find(".") == -1)
 	{
 		numberator = calculate;
 	}
 	else
 	{
-		for (int i = calculate.size() - 1; i >= 0; i--)
+		for (int i = calculate.find(".") + 1; i < calculate.size(); i++)
 		{
-			if (calculate[i] == '.')
-			{
-				calculate.erase(calculate.begin() + i);
-				break;
-			}
 			denominator += "0";
 		}
-		numberator =calculate;
+		calculate.erase(calculate.begin()+calculate.find("."));
+		numberator = calculate;
 	}
+}
+
+NumberObject::NumberObject(string numberator, string denominator)
+{
+	if (!check(numberator)) sign = "-";
+	this->numberator = numberator;
+	this->denominator = denominator;
 }
 
 
@@ -35,32 +48,51 @@ NumberObject::~NumberObject()
 
 NumberObject NumberObject::operator+(NumberObject &Number2)
 {
-	string newDenominator = NumberMultiplication(denominator, Number2.denominator);
-	string newNumberator1 = NumberMultiplication(numberator, Number2.denominator);
-	string newNumberator2 = NumberMultiplication(denominator, Number2.numberator);
-	string addition = NumberAddition(newNumberator1, newNumberator2);
+	string newDenominator;
+	string newNumberator1;
+	string newNumberator2;
+	string addition;
+	if ((sign == "-" && Number2.sign == "-") || (sign == "" && Number2.sign == ""))
+	{
+		newDenominator = NumberMultiplication(denominator, Number2.denominator);
+		newNumberator1 = NumberMultiplication(numberator, Number2.denominator);
+		newNumberator2 = NumberMultiplication(denominator, Number2.numberator);
+		addition = sign + NumberAddition(newNumberator1, newNumberator2);
+	}
 	return NumberObject(addition, newDenominator);
 }
 
 NumberObject NumberObject::operator*(NumberObject &Number2)
 {
+	string newSign = "-";
+	if ((checkSign(*this) && checkSign(Number2)) || (!checkSign(*this) && !checkSign(Number2)))
+		newSign = "";
 	string newDenominator = NumberMultiplication(denominator, Number2.denominator);
-	string newNumberator = NumberMultiplication(numberator, Number2.numberator);
-	return NumberObject(newNumberator,newDenominator);
+	string newNumberator = newSign + NumberMultiplication(numberator, Number2.numberator);
+	return NumberObject(newNumberator, newDenominator);
 }
 
 NumberObject NumberObject::operator/(NumberObject & Number2)
 {
-	string newNumberator = NumberMultiplication(numberator, Number2.denominator);
+	string newSign = "-";
+	if ((checkSign(*this) && checkSign(Number2)) || (!checkSign(*this) && !checkSign(Number2)))
+		newSign = "";
+	string newNumberator = newSign + NumberMultiplication(numberator, Number2.denominator);
 	string newDenominator = NumberMultiplication(denominator, Number2.numberator);
 	return NumberObject(newNumberator, newDenominator);
+}
+NumberObject plus2("2");
+NumberObject NumberObject::operator^(NumberObject & Number2)
+{
+	Number2 = Number2 * plus2;
+	return NumberObject();
 }
 
 bool check(string &s)
 {
 	if (s[0] == '-')
 	{
-		s = &s[1];
+		s.erase(s.begin());
 		return false;
 	}
 	return true;
@@ -68,9 +100,6 @@ bool check(string &s)
 
 string NumberMultiplication(string s1, string s2)
 {
-	string sign = "";
-	if (check(s1) != check(s2))
-		sign = "-";
 	int size = s1.size() + s2.size() - 1;
 	if ((s1[0] - '0')*(s2[0] - '0') >= 10)
 		size++;
@@ -78,9 +107,7 @@ string NumberMultiplication(string s1, string s2)
 	for (int i = 0; i < s1.size(); i++)
 	{
 		for (int j = 0; j < s2.size(); j++)
-		{
 			result[i + j] += (s1[s1.size() - i - 1] - '0')*(s2[s2.size() - j - 1] - '0');
-		}
 	}
 	int count = 0;
 	stringstream ss;
@@ -94,7 +121,6 @@ string NumberMultiplication(string s1, string s2)
 		ss << result[count];
 		count++;
 	}
-	ss << sign;
 	string result_s = ss.str();
 	ss.clear();
 	reverse(result_s.begin(), result_s.end());
@@ -103,9 +129,6 @@ string NumberMultiplication(string s1, string s2)
 
 string NumberAddition(string s1, string s2)
 {
-	string sign = "";
-	if ((!check(s1)) && (!check(s2)))
-		sign = "-";
 	int size = fmax(s1.size(), s2.size());
 	if ((s1[0] - '0') + (s2[0] - '0') >= 10)
 		size++;
@@ -126,21 +149,21 @@ string NumberAddition(string s1, string s2)
 		number1 = 0; number2 = 0;
 		counter++;
 	}
-	int count = size - 1;
+	int count = 0;
 	stringstream ss;
-	while (count >= 0)
+	while (count < size)
 	{
 		if (result[count] >= 10)
 		{
-			result[count - 1] += result[count] / 10;
+			result[count + 1] += result[count] / 10;
 			result[count] %= 10;
 		}
 		ss << result[count];
-		count--;
+		count++;
 	}
-	ss << sign;
 	string result_s = ss.str();
 	ss.clear();
+	reverse(result_s.begin(), result_s.end());
 	return result_s;
 }
 
@@ -150,58 +173,35 @@ string NumberSubtraction(string s1, string s2)
 }
 
 
-void inToPostfix(vector<string> infix, vector<string> &postfix)
+void inToPostfix(const char* infix, char* postfix)
 {
-	vector<string> stack;
-	int i;
-	for (i = 0; i < infix.size(); i++)
+	char stack[10000] = { '\0' };
+	int i, j, top;
+	for (i = 0, j = 0, top = 0; infix[i] != '\0'; i++) switch (infix[i])
 	{
-		if (infix[i] == "(")
+	case '(':              // 運算子堆疊 
+		stack[++top] = infix[i];
+		break;
+	case '+': case '-': case '*': case '/':
+		while (priority(stack[top]) >= priority(infix[i]))
 		{
-			stack.push_back(infix[i]);
-			continue;
+			postfix[j++] = stack[top--];
 		}
-		if (infix[i] == "+" ||
-			infix[i] == "-" ||
-			infix[i] == "*" ||
-			infix[i] == "/" ||
-			infix[i] == "^" ||
-			infix[i] == "!")
-		{
-			if (stack.size()> 0)
-			{
-				while (priority(stack[stack.size() - 1][0]) >= priority(infix[i][0]))
-				{
-					postfix.push_back(stack[stack.size() - 1]);
-					stack.pop_back();
-					if (stack.size() == 0)
-						break;
-				}
-			}
-			stack.push_back(infix[i]); // 存入堆疊 
-			continue;
+		stack[++top] = infix[i]; // 存入堆疊 
+		break;
+	case ')':
+		while (stack[top] != '(')
+		{ // 遇 ) 輸出至 ( 
+			postfix[j++] = stack[top--];
 		}
-		if (infix[i] == ")")
-		{
-			if (stack.size() > 0)
-			{
-				while (stack[stack.size() - 1] != "(")
-				{ // 遇 ) 輸出至 ( 
-					postfix.push_back(stack[stack.size() - 1]);
-					stack.pop_back();
-					if (stack.size() == 0)
-						break;
-				}
-				stack.pop_back();
-			}// 不輸出 ( 
-			continue;
-		}
-		postfix.push_back(infix[i]);
+		top--;  // 不輸出 ( 
+		break;
+	default:  // 運算元直接輸出 
+		postfix[j++] = infix[i];
 	}
-	while (stack.size() > 0)
+	while (top > 0)
 	{
-		postfix.push_back(stack[stack.size() - 1]);
-		stack.pop_back();
+		postfix[j++] = stack[top--];
 	}
 }
 
@@ -209,12 +209,10 @@ int priority(char op)
 {
 	switch (op)
 	{
-		case '+': case '-': return 1;
-		case '*': case '/': return 2;
-		case '^': return 3;
-		case '!': return 4;
-		case '(': case ')': return 5;
-		default:
-			return 0;
+	case '+': case '-': return 1;
+	case '*': case '/': return 2;
+	case '^': return 3;
+	case '!': return 4;
+	default:            return 0;
 	}
 }
