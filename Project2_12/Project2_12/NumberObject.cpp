@@ -86,8 +86,24 @@ NumberObject NumberObject::operator^(NumberObject & Number2)
 {
 	Number2 = Number2 * plus2;
 	long long int l= Number2.getInteger();
+	NumberObject result("1");
+	for (int i = 0; i < l; i++)
+	{
+		result = result * (*this);
+	}
 
-	return NumberObject();
+
+	vector<int>sqrt;
+	NumberObject x ("1");
+	while (result.denominator.length() > (x*x).denominator.length())
+	{
+		char temp = x.denominator.back();
+		x.denominator.pop_back();
+		x.denominator.push_back(temp + 1);
+	}
+
+
+	return NumberObject(result.numberator,result.denominator);
 }
 
 bool check(string &s)

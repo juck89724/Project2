@@ -32,8 +32,14 @@ public:
 		long long int result=0;
 		for (int i = 0; i < numberator.size(); i++)
 		{
-			result += (numberator[i]-'0') * pow(10,i);
+			result += (numberator[i]-'0') * pow(10,numberator.size() -i -1);
 		}
+		long long int d=0;
+		for (int i = 0; i < denominator.size(); i++)
+		{
+			d += (denominator[i] - '0') * pow(10, denominator.size() - i - 1);
+		}
+		return result / d;
 	};
 	void setName(string name) { this->name = name; };
 	~NumberObject();
