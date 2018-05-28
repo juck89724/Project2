@@ -1,7 +1,5 @@
 #include "NumberObject.h"
 
-string NumberMultiplication(string s1, string s2);
-string NumberAddition(string s1, string s2);
 
 NumberObject::NumberObject()
 {
@@ -10,7 +8,24 @@ NumberObject::NumberObject()
 
 NumberObject::NumberObject(string calculate)
 {
-	numberator = calculate;
+	this->calculate = calculate;
+	if (calculate.find(".") == -1)
+	{
+		numberator = calculate;
+	}
+	else
+	{
+		for (int i = calculate.size() - 1; i >= 0; i--)
+		{
+			if (calculate[i] == '.')
+			{
+				calculate.erase(calculate.begin() + i);
+				break;
+			}
+			denominator += "0";
+		}
+		numberator =calculate;
+	}
 }
 
 
@@ -132,4 +147,74 @@ string NumberAddition(string s1, string s2)
 string NumberSubtraction(string s1, string s2)
 {
 	return string();
+}
+
+
+void inToPostfix(vector<string> infix, vector<string> &postfix)
+{
+	vector<string> stack;
+	int i;
+	for (i = 0; i < infix.size(); i++)
+	{
+		if (infix[i] == "(")
+		{
+			stack.push_back(infix[i]);
+			continue;
+		}
+		if (infix[i] == "+" ||
+			infix[i] == "-" ||
+			infix[i] == "*" ||
+			infix[i] == "/" ||
+			infix[i] == "^" ||
+			infix[i] == "!")
+		{
+			if (stack.size()> 0)
+			{
+				while (priority(stack[stack.size() - 1][0]) >= priority(infix[i][0]))
+				{
+					postfix.push_back(stack[stack.size() - 1]);
+					stack.pop_back();
+					if (stack.size() == 0)
+						break;
+				}
+			}
+			stack.push_back(infix[i]); // 存入堆疊 
+			continue;
+		}
+		if (infix[i] == ")")
+		{
+			if (stack.size() > 0)
+			{
+				while (stack[stack.size() - 1] != "(")
+				{ // 遇 ) 輸出至 ( 
+					postfix.push_back(stack[stack.size() - 1]);
+					stack.pop_back();
+					if (stack.size() == 0)
+						break;
+				}
+				stack.pop_back();
+			}// 不輸出 ( 
+			continue;
+		}
+		postfix.push_back(infix[i]);
+	}
+	while (stack.size() > 0)
+	{
+		postfix.push_back(stack[stack.size() - 1]);
+		stack.pop_back();
+	}
+}
+
+int priority(char op)
+{
+	switch (op)
+	{
+		case '+': case '-': return 1;
+		case '*': case '/': return 2;
+		case '^': return 3;
+		case '!': return 4;
+		case '(': case ')': return 5;
+		default:
+			return 0;
+	}
 }
