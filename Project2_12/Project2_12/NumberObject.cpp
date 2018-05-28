@@ -9,7 +9,6 @@ bool checkSign(NumberObject number)
 	return true;
 };
 
-
 NumberObject::NumberObject()
 {
 
@@ -214,5 +213,41 @@ int priority(char op)
 	case '^': return 3;
 	case '!': return 4;
 	default:            return 0;
+	}
+}
+
+int big_compare(NumberObject a, NumberObject b)
+{
+	string ad = a.getDenominator();
+	string bd = b.getDenominator();
+	while (ad.length() != bd.length())
+	{
+		if (ad.length() < bd.length())
+		{
+			a.setDenominator(a.getDenominator()+"0");
+			a.setNumberator(a.getNumberator() + "0");
+		}
+		if (ad.length() > bd.length())
+		{
+			b.setDenominator(b.getDenominator() + "0");
+			b.setNumberator(b.getNumberator() + "0");
+		}
+		ad = a.getDenominator();
+		bd = b.getDenominator();
+	}
+	int a_size = a.getNumberator().length();
+	int b_size = b.getNumberator().length();
+	if (a_size > b_size)
+		return 1;
+	else if (b_size > a_size)
+		return -1;
+	else
+	{
+		for (int i = 0; i < a_size; i++)
+		{
+			if (a.getNumberator()[i] != b.getNumberator()[i])
+				return a.getNumberator()[i] - b.getNumberator()[i];
+		}
+		return 0;
 	}
 }

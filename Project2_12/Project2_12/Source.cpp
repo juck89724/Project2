@@ -15,7 +15,7 @@ int main()
 	string line;
 	Integer i1("20");
 	Decimal d1("20.5");
-	NumberObject n1 = i1 ^ d1;
+	int j= big_compare(i1, d1);
 	while (getline(cin, line))
 	{
 		stringstream ss;

@@ -9,8 +9,10 @@ void inToPostfix(const char* infix, char* postfix);
 int priority(char); // 運算子優先權
 bool check(string &s);
 
+
 string NumberMultiplication(string s1, string s2);
 string NumberAddition(string s1, string s2);
+
 class NumberObject
 {
 public:
@@ -35,7 +37,10 @@ public:
 			result += (numberator[i]-'0') * pow(10,i);
 		}
 	};
+
 	void setName(string name) { this->name = name; };
+	void setNumberator(string num) { this->numberator = num; };
+	void setDenominator(string den) { this->denominator = den; };
 	~NumberObject();
 private:
 	string numberator = "0";
@@ -44,4 +49,4 @@ private:
 	string calculate = "";
 	string name = "";
 };
-
+int big_compare(NumberObject a, NumberObject b);
