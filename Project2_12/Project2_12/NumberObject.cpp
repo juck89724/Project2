@@ -85,6 +85,8 @@ NumberObject plus2("2");
 NumberObject NumberObject::operator^(NumberObject & Number2)
 {
 	Number2 = Number2 * plus2;
+	long long int l= Number2.getInteger();
+
 	return NumberObject();
 }
 
