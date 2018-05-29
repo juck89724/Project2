@@ -26,7 +26,7 @@ NumberObject::NumberObject(string calculate)
 	{
 		for (int i = calculate.find(".") + 1; i < calculate.size(); i++)
 			denominator += "0";
-		calculate.erase(calculate.begin()+calculate.find("."));
+		calculate.erase(calculate.begin() + calculate.find("."));
 		numberator = calculate;
 	}
 }
@@ -54,14 +54,14 @@ NumberObject NumberObject::operator+(NumberObject &Number2)
 	else if (sign == "" && Number2.sign == "-")
 	{
 		if (big_compare(*this, Number2) >= 0)
-			addition = NumberSubtraction(newNumberator1,newNumberator2);
+			addition = NumberSubtraction(newNumberator1, newNumberator2);
 		else
-			addition= "-" + NumberSubtraction(newNumberator2, newNumberator1);
+			addition = "-" + NumberSubtraction(newNumberator2, newNumberator1);
 	}
-	else if(sign == "-" && Number2.sign == "")
+	else if (sign == "-" && Number2.sign == "")
 	{
 		if (big_compare(*this, Number2) > 0)
-			addition = "-" + NumberSubtraction(newNumberator1, newNumberator2); 
+			addition = "-" + NumberSubtraction(newNumberator1, newNumberator2);
 		else
 			addition = NumberSubtraction(newNumberator2, newNumberator1);
 	}
@@ -90,7 +90,7 @@ NumberObject NumberObject::operator-(NumberObject & Number2)
 		else
 			addition = NumberSubtraction(newNumberator2, newNumberator1);
 	}
-	return NumberObject(addition,newDenominator);
+	return NumberObject(addition, newDenominator);
 }
 
 NumberObject NumberObject::operator*(NumberObject &Number2)
@@ -115,8 +115,72 @@ NumberObject NumberObject::operator/(NumberObject & Number2)
 NumberObject plus2("2");
 NumberObject NumberObject::operator^(NumberObject & Number2)
 {
-	Number2 = Number2 * plus2;
-	return NumberObject();
+	if (Number2.denominator != "1")
+		Number2 = Number2 * plus2;
+	long long int l = Number2.getInteger();
+	NumberObject result("1");
+	for (int i = 0; i < l; i++)
+		result = result * (*this);
+	if (Number2.denominator != "1")
+	{
+		NumberObject x("1", "1");
+		for (int i = 0; i < 100; i++)//誤差為小數點後一百位
+			x.denominator += "0";
+		NumberObject high("1");
+		NumberObject low("1");
+		NumberObject one("1");
+		NumberObject zero("0");
+		NumberObject two("10", "5");
+
+
+		if (big_compare(result, zero) < 0)
+		{
+			cout << "Error";
+		}
+		else if (big_compare(result, one) < 0)
+		{
+			low = zero;
+			high = one;  // 若 0 < result < 1 則其平方根必然介於 0 與 1之間。
+		}
+		else
+		{
+			low = one;
+			high = result;  // 若 result > 1 , 則其平方根必然介於 1 與 result 之間。
+		}
+		while (big_compare(high - low, x) > 0)  // 不斷逼近，直到範圍夠小為止。
+		{
+			NumberObject mid = (high + low) / two;
+			while (mid.denominator.size() > 101)
+			{
+				mid.numberator.pop_back();
+				mid.denominator.pop_back();
+			}
+			//cout << mid.numberator << "/" << mid.denominator << endl;
+			if (big_compare(mid*mid, result) > 0)          // 解小於 mid , 將上限調為 mid
+				high = mid;
+			//cout << high.numberator << endl;
+			else
+				low = mid; // 解大於 mid , 將下限調為 mid
+		}
+		if (Number2.getSign() == "-")
+			return NumberObject(low.denominator, low.numberator);
+		return NumberObject(low.numberator, low.denominator);
+	}
+	return NumberObject(result.numberator, result.denominator);
+}
+
+NumberObject NumberObject::factorial()
+{
+	NumberObject result("1");
+	NumberObject x("1");
+	NumberObject one("1");
+	for (long long int i = 1; i <= this->getInteger(); i++)
+	{
+		result = result * x;
+		x = x + one;
+	}
+
+	return NumberObject(result.numberator, result.denominator);
 }
 
 bool check(string &s)
@@ -131,9 +195,7 @@ bool check(string &s)
 
 string NumberMultiplication(string s1, string s2)
 {
-	int size = s1.size() + s2.size() - 1;
-	if ((s1[0] - '0')*(s2[0] - '0') >= 10)
-		size++;
+	int size = s1.size() + s2.size() + 1;
 	int *result = new int[size] { 0 };
 	for (int i = 0; i < s1.size(); i++)
 	{
@@ -153,16 +215,12 @@ string NumberMultiplication(string s1, string s2)
 		count++;
 	}
 	string result_s = ss.str();
-	ss.clear();
-	reverse(result_s.begin(), result_s.end());
-	return result_s;
+	return getResultString(result_s);
 }
 
 string NumberAddition(string s1, string s2)
 {
-	int size = fmax(s1.size(), s2.size());
-	if ((s1[0] - '0') + (s2[0] - '0') >= 10)
-		size++;
+	int size = fmax(s1.size(), s2.size()) + 1;
 	int counter = 0;
 	int *result = new int[size] { 0 };
 	int s1_count = s1.size() - 1, s2_count = s2.size() - 1;
@@ -193,14 +251,10 @@ string NumberAddition(string s1, string s2)
 		count++;
 	}
 	string result_s = ss.str();
-	ss.clear();
-	reverse(result_s.begin(), result_s.end());
-	return result_s;
+	return getResultString(result_s);
 }
-
 string NumberSubtraction(string s1, string s2)
 {
-	
 	int size = s1.size();
 	int counter = 0;
 	int *result = new int[size] { 0 };
@@ -230,16 +284,19 @@ string NumberSubtraction(string s1, string s2)
 		count++;
 	}
 	string result_s = ss.str();
-	ss.clear();
+	return getResultString(result_s);
+}
+
+string getResultString(string result_s)
+{
 	reverse(result_s.begin(), result_s.end());
-	count = 0;
-	while (result_s[count]=='0' && result_s.size()>1)
+	int count = 0;
+	while (result_s[count] == '0' && result_s.size() > 1)
 	{
 		result_s.erase(result_s.begin() + count);
 	}
 	return result_s;
 }
-
 
 void inToPostfix(const char* infix, char* postfix)
 {
@@ -262,6 +319,7 @@ void inToPostfix(const char* infix, char* postfix)
 	case ')':
 		while (stack[top] != '(')
 		{ // 遇 ) 輸出至 ( 
+			postfix[j++] = ' ';
 			postfix[j++] = stack[top--];
 		}
 		top--;  // 不輸出 ( 
@@ -296,7 +354,7 @@ int big_compare(NumberObject a, NumberObject b)
 	{
 		if (ad.length() < bd.length())
 		{
-			a.setDenominator(a.getDenominator()+"0");
+			a.setDenominator(a.getDenominator() + "0");
 			a.setNumberator(a.getNumberator() + "0");
 		}
 		if (ad.length() > bd.length())
