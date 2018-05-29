@@ -92,18 +92,35 @@ NumberObject NumberObject::operator^(NumberObject & Number2)
 		result = result * (*this);
 	}
 
-
-	vector<int>sqrt;
 	NumberObject x ("1");
-	while (result.denominator.length() > (x*x).denominator.length())
+	for (int i = 0; i < 100; i++)//誤差為小數點後一百位
 	{
-		char temp = x.denominator.back();
-		x.denominator.pop_back();
-		x.denominator.push_back(temp + 1);
+		x.denominator + "0";
+	}
+	NumberObject high;
+	NumberObject low;
+	NumberObject one("1");
+	NumberObject zero("0");
+	if (big_compare(result,one) < 0) 
+	{
+		low = zero; 
+		high = one;  // 若 0 < x < 1 則其平方根必然介於 0 與 1之間。
+	}
+	else 
+	{
+		low = one; 
+		high = result;  // 若 x > 1 , 則其平方根必然介於 1 與 x 之間。
+	}
+	while (big_compare(high - low,x) > 0)  // 不斷逼近，直到範圍夠小為止。
+	{
+		NumberObject mid = (low + high) / plus2;
+		if (big_compare(mid*mid,x) > 0)          // 解小於 mid , 將上限調為 mid
+			high = mid;
+		else
+			low = mid;              // 解大於 mid , 將下限調為 mid
 	}
 
-
-	return NumberObject(result.numberator,result.denominator);
+	return NumberObject(low.numberator,low.denominator);
 }
 
 bool check(string &s)
@@ -232,5 +249,40 @@ int priority(char op)
 	case '^': return 3;
 	case '!': return 4;
 	default:            return 0;
+	}
+}
+int big_compare(NumberObject a, NumberObject b)
+{
+	string ad = a.getDenominator();
+	string bd = b.getDenominator();
+	while (ad.length() != bd.length())
+	{
+		if (ad.length() < bd.length())
+		{
+			a.setDenominator(a.getDenominator() + "0");
+			a.setNumberator(a.getNumberator() + "0");
+		}
+		if (ad.length() > bd.length())
+		{
+			b.setDenominator(b.getDenominator() + "0");
+			b.setNumberator(b.getNumberator() + "0");
+		}
+		ad = a.getDenominator();
+		bd = b.getDenominator();
+	}
+	int a_size = a.getNumberator().length();
+	int b_size = b.getNumberator().length();
+	if (a_size > b_size)
+		return 1;
+	else if (b_size > a_size)
+		return -1;
+	else
+	{
+		for (int i = 0; i < a_size; i++)
+		{
+			if (a.getNumberator()[i] != b.getNumberator()[i])
+				return a.getNumberator()[i] - b.getNumberator()[i];
+		}
+		return 0;
 	}
 }

@@ -42,6 +42,8 @@ public:
 		return result / d;
 	};
 	void setName(string name) { this->name = name; };
+	void setNumberator(string num) { this->numberator = num; };
+	void setDenominator(string den) { this->denominator = den; };
 	~NumberObject();
 private:
 	string numberator = "0";
@@ -50,4 +52,4 @@ private:
 	string calculate = "";
 	string name = "";
 };
-
+int big_compare(NumberObject a, NumberObject b);
