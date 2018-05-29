@@ -13,50 +13,87 @@ public:
 		setName("Integer");
 	};
 	Integer(string calculate) 
+		:NumberObject::NumberObject(calculate)
 	{
-		this->NumberObject::NumberObject(calculate);
 		setName("Integer"); 
+		
 		if (getDenominator() != "1")
 		{
-			NumberObject n(getNumberator());
-			NumberObject p(getDenominator());
-			NumberObject times("1");
-			NumberObject one("1");
-			NumberObject d = p * times;
-			while (big_compare(n, d) >= 0)
+			string result;
+			string num = getNumberator();
+			bool c = false;
+			string mod;
+			for (int i = 0; i < num.size(); i++)
 			{
-				times = times + one;
-				d = p * times;
+				mod += num[i];
+				NumberObject nmod(mod);
+				NumberObject d(getDenominator());
+				if (mod.size() >= getDenominator().size())
+				{
+					NumberObject p(getDenominator());
+					NumberObject times("1");
+					NumberObject one("1");
+					while (big_compare(nmod, d) >= 0)
+					{
+						times = times + one;
+						d = p * times;
+					}
+					times = times - one;
+					d = p * times;
+					mod = (nmod - d).getNumberator();
+					if (times.getNumberator() != "0")
+						c = true;
+					if (c)
+						result+= times.getNumberator();
+				}
 			}
-			times = times - one;
-			setNumberator(times.getNumberator());
-			setDenominator(times.getDenominator());
-			calculate = times.getNumberator();
+			if (!c)
+				result = "0";
+			setNumberator(result);
+			setDenominator("1");
 		}
 	};
 	Integer(string numberator, string denominator) 
+		:NumberObject::NumberObject(numberator, denominator)
 	{
-		this->NumberObject::NumberObject(numberator, denominator);
 		setName("Integer");
 		if (getDenominator() != "1")
 		{
-			NumberObject n(getNumberator());
-			NumberObject p(getDenominator());
-			NumberObject times("1");
-			NumberObject one("1");
-			NumberObject d = p * times;
-			while (big_compare(n, d) >= 0)
+			string result;
+			string num = getNumberator();
+			bool c = false;
+			string mod;
+			for (int i = 0; i < num.size(); i++)
 			{
-				times = times + one;
-				d = p * times;
+				mod += num[i];
+				NumberObject nmod(mod);
+				NumberObject d(getDenominator());
+				if (mod.size() >= getDenominator().size())
+				{
+					NumberObject p(getDenominator());
+					NumberObject times("1");
+					NumberObject one("1");
+					while (big_compare(nmod, d) >= 0)
+					{
+						times = times + one;
+						d = p * times;
+					}
+					times = times - one;
+					d = p * times;
+					mod = (nmod - d).getNumberator();
+					if (times.getNumberator() != "0")
+						c = true;
+					if (c)
+						result += times.getNumberator();
+				}
 			}
-			times = times - one;
-			setNumberator(times.getNumberator());
-			setDenominator(times.getDenominator());
-			setCalculate(times.getNumberator());
+			if (!c)
+				result = "0";
+			setNumberator(result);
+			setDenominator("1");
 		}
 	};
+ 	
 	~Integer();
-	void print() { cout << "this is Integer"; };
 private:
 };

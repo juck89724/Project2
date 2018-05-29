@@ -16,7 +16,6 @@ NumberObject::NumberObject()
 
 NumberObject::NumberObject(string calculate)
 {
-	this->calculate = calculate;
 	if (!check(calculate)) sign = "-";
 	if (calculate.find(".") == -1)
 	{
@@ -27,6 +26,10 @@ NumberObject::NumberObject(string calculate)
 		for (int i = calculate.find(".") + 1; i < calculate.size(); i++)
 			denominator += "0";
 		calculate.erase(calculate.begin() + calculate.find("."));
+		while (calculate[0] == '0')
+		{
+			calculate.erase(calculate.begin());
+		}
 		numberator = calculate;
 	}
 }
@@ -166,8 +169,11 @@ NumberObject NumberObject::operator^(NumberObject & Number2)
 			return NumberObject(low.denominator, low.numberator);
 		return NumberObject(low.numberator, low.denominator);
 	}
+	if (Number2.getSign() == "-")
+		return NumberObject(result.denominator,result.numberator);
 	return NumberObject(result.numberator, result.denominator);
 }
+
 
 NumberObject NumberObject::factorial()
 {
@@ -253,6 +259,68 @@ string NumberAddition(string s1, string s2)
 	string result_s = ss.str();
 	return getResultString(result_s);
 }
+
+ostream & operator<<(ostream &output, NumberObject &number)
+{
+	output << number.sign;
+	if (number.getName() == "Integer")
+		output << number.numberator;
+	else
+	{
+		string num = number.numberator;
+		bool c=false;
+		string mod;
+		for (int i = 0; i < num.size(); i++)
+		{
+			mod += num[i];
+			NumberObject nmod(mod);
+			NumberObject d(number.denominator);
+			if (mod.size() >= number.denominator.size())
+			{
+				NumberObject p(number.denominator);
+				NumberObject times("1");
+				NumberObject one("1");
+				while (big_compare(nmod, d) >= 0)
+				{
+					times = times + one;
+					d = p * times;
+				}
+				times = times - one;
+				d = p * times;
+				mod = (nmod - d).numberator;
+				if (times.numberator != "0")
+					c = true;
+				if(c)
+					output << times.getNumberator();
+			}
+		}
+		if (!c)
+			output << "0";
+		output << ".";
+		for (int i = 0; i < 100; i++)
+		{
+			if (mod != "0")
+				mod += "0";
+			NumberObject nmod(mod);
+			NumberObject d(number.getDenominator());
+			NumberObject p(number.getDenominator());
+			NumberObject times("1");
+			NumberObject one("1");
+			while (big_compare(nmod, d) >= 0)
+			{
+				times = times + one;
+				d = p * times;
+			}
+			times = times - one;
+			d = p * times;
+			mod = (nmod - d).numberator;
+			output << times.getNumberator();
+		}
+		output << endl;
+	}
+	return output;
+}
+
 string NumberSubtraction(string s1, string s2)
 {
 	int size = s1.size();
@@ -355,12 +423,14 @@ int big_compare(NumberObject a, NumberObject b)
 		if (ad.length() < bd.length())
 		{
 			a.setDenominator(a.getDenominator() + "0");
-			a.setNumberator(a.getNumberator() + "0");
+			if(a.getNumberator()!="0")
+				a.setNumberator(a.getNumberator() + "0");
 		}
 		if (ad.length() > bd.length())
 		{
 			b.setDenominator(b.getDenominator() + "0");
-			b.setNumberator(b.getNumberator() + "0");
+			if (b.getNumberator() != "0")
+				b.setNumberator(b.getNumberator() + "0");
 		}
 		ad = a.getDenominator();
 		bd = b.getDenominator();
