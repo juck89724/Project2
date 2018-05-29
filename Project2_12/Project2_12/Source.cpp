@@ -13,9 +13,10 @@ vector<NumberObject*> num;
 int main()
 {
 	string line;
-	Integer i1("1024");
-	Decimal d1("2.5");
+	Integer i1("2");
+	Decimal d1("120");
 	NumberObject n1 = i1 ^ d1;
+	NumberObject pp = d1.factorial();
 	while (getline(cin, line))
 	{
 		stringstream ss;

@@ -185,8 +185,16 @@ NumberObject NumberObject::operator^(NumberObject & Number2)
 
 NumberObject NumberObject::factorial()
 {
+	NumberObject result("1");
+	NumberObject x("1");
+	NumberObject one("1");
+	for (long long int i = 1;i <= this->getInteger(); i++)
+	{
+		result = result * x;
+		x = x + one ;
+	}
 	
-	return NumberObject();
+	return NumberObject(result.numberator, result.denominator);
 }
 
 bool check(string &s)
