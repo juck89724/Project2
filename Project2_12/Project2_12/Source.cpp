@@ -13,13 +13,13 @@ vector<NumberObject*> num;
 int main()
 {
 	string line;
+	vector<string> text;
 	Integer i1("20");
 	Decimal d1("20.5");
-	int j= big_compare(i1, d1);
+	int j = big_compare(i1, d1);
 	while (getline(cin, line))
 	{
-		stringstream ss;
-		ss << line;
+
 		if (line.substr(0, 3) == "Set")
 		{
 			if (line.find("Integer") != -1)
@@ -33,13 +33,19 @@ int main()
 		}
 		else
 		{
-			char *postfix = new char[MAX] {'\0'};
-			string s;
+			char *postfix = new char[MAX] { '\0' };
 			int counter = 0;
+			stringstream ss;
+			string s;
 			inToPostfix(line.c_str(), postfix);
-			/*for (int i = 0; i < postfix.size(); i++)
+			ss << postfix;
+			while (ss >> s)
 			{
-				string s= postfix[i];
+				text.push_back(s);
+			}
+			for (int i = 0; i < text.size(); i++)
+			{
+				string s= text[i];
 				NumberObject *result=new NumberObject();
 				if (priority(s[0]) != 0 && s.size()==1)
 				{
@@ -47,6 +53,8 @@ int main()
 					NumberObject newNumber2 = *num[num.size() - 1];
 					if (s == "+")
 						*result = newNumber1 + newNumber2;
+					if (s == "-")
+						*result = newNumber1 - newNumber2;
 					if (s == "*")
 						*result = newNumber1 * newNumber2;
 					if (s == "/")
@@ -63,11 +71,10 @@ int main()
 						newNumber = new Integer(s);
 					else
 						newNumber = new Decimal(s);
-					newNumber->print();
 					num.push_back(newNumber);
 				}
-			}*/
+			}
 		}
 	}
-	
+
 }

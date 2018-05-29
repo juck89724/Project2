@@ -9,7 +9,7 @@ void inToPostfix(const char* infix, char* postfix);
 int priority(char); // 運算子優先權
 bool check(string &s);
 
-
+string NumberSubtraction(string s1, string s2);
 string NumberMultiplication(string s1, string s2);
 string NumberAddition(string s1, string s2);
 
@@ -25,6 +25,7 @@ public:
 	string getDenominator() { return denominator; };
 	string getSign() { return sign; };
 	NumberObject operator+( NumberObject &Number2);
+	NumberObject operator-(NumberObject &Number2);
 	NumberObject operator*( NumberObject &Number2);
 	NumberObject operator/(NumberObject &Number2);
 	NumberObject operator^(NumberObject &Number2);
@@ -36,6 +37,7 @@ public:
 		{
 			result += (numberator[i]-'0') * pow(10,i);
 		}
+		return result;
 	};
 
 	void setName(string name) { this->name = name; };

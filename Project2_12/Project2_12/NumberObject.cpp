@@ -25,9 +25,7 @@ NumberObject::NumberObject(string calculate)
 	else
 	{
 		for (int i = calculate.find(".") + 1; i < calculate.size(); i++)
-		{
 			denominator += "0";
-		}
 		calculate.erase(calculate.begin()+calculate.find("."));
 		numberator = calculate;
 	}
@@ -47,18 +45,52 @@ NumberObject::~NumberObject()
 
 NumberObject NumberObject::operator+(NumberObject &Number2)
 {
-	string newDenominator;
-	string newNumberator1;
-	string newNumberator2;
+	string newDenominator = NumberMultiplication(denominator, Number2.denominator);
+	string newNumberator1 = NumberMultiplication(numberator, Number2.denominator);
+	string newNumberator2 = NumberMultiplication(denominator, Number2.numberator);
 	string addition;
 	if ((sign == "-" && Number2.sign == "-") || (sign == "" && Number2.sign == ""))
-	{
-		newDenominator = NumberMultiplication(denominator, Number2.denominator);
-		newNumberator1 = NumberMultiplication(numberator, Number2.denominator);
-		newNumberator2 = NumberMultiplication(denominator, Number2.numberator);
 		addition = sign + NumberAddition(newNumberator1, newNumberator2);
+	else if (sign == "" && Number2.sign == "-")
+	{
+		if (big_compare(*this, Number2) >= 0)
+			addition = NumberSubtraction(newNumberator1,newNumberator2);
+		else
+			addition= "-" + NumberSubtraction(newNumberator2, newNumberator1);
+	}
+	else if(sign == "-" && Number2.sign == "")
+	{
+		if (big_compare(*this, Number2) > 0)
+			addition = "-" + NumberSubtraction(newNumberator1, newNumberator2); 
+		else
+			addition = NumberSubtraction(newNumberator2, newNumberator1);
 	}
 	return NumberObject(addition, newDenominator);
+}
+
+NumberObject NumberObject::operator-(NumberObject & Number2)
+{
+	string newDenominator = NumberMultiplication(denominator, Number2.denominator);
+	string newNumberator1 = NumberMultiplication(numberator, Number2.denominator);
+	string newNumberator2 = NumberMultiplication(denominator, Number2.numberator);
+	string addition;
+	if ((sign == "" && Number2.sign == "-") || (sign == "-" && Number2.sign == ""))
+		addition = sign + NumberAddition(newNumberator1, newNumberator2);
+	else if (sign == "" && Number2.sign == "")
+	{
+		if (big_compare(*this, Number2) >= 0)
+			addition = NumberSubtraction(newNumberator1, newNumberator2);
+		else
+			addition = "-" + NumberSubtraction(newNumberator2, newNumberator1);
+	}
+	else if (sign == "-" && Number2.sign == "-")
+	{
+		if (big_compare(*this, Number2) > 0)
+			addition = "-" + NumberSubtraction(newNumberator1, newNumberator2);
+		else
+			addition = NumberSubtraction(newNumberator2, newNumberator1);
+	}
+	return NumberObject(addition,newDenominator);
 }
 
 NumberObject NumberObject::operator*(NumberObject &Number2)
@@ -168,7 +200,44 @@ string NumberAddition(string s1, string s2)
 
 string NumberSubtraction(string s1, string s2)
 {
-	return string();
+	
+	int size = s1.size();
+	int counter = 0;
+	int *result = new int[size] { 0 };
+	int s1_count = s1.size() - 1, s2_count = s2.size() - 1;
+	int number1, number2;
+	while (counter < size)
+	{
+		if (s1_count >= 0)
+			number1 = (s1[s1_count] - '0');
+		if (s2_count >= 0)
+			number2 = (s2[s2_count] - '0');
+		result[counter] = number1 - number2;
+		s1_count -= 1; s2_count -= 1;
+		number1 = 0; number2 = 0;
+		counter++;
+	}
+	int count = 0;
+	stringstream ss;
+	while (count < size)
+	{
+		if (result[count] < 0)
+		{
+			result[count + 1] -= 1;
+			result[count] += 10;
+		}
+		ss << result[count];
+		count++;
+	}
+	string result_s = ss.str();
+	ss.clear();
+	reverse(result_s.begin(), result_s.end());
+	count = 0;
+	while (result_s[count]=='0' && result_s.size()>1)
+	{
+		result_s.erase(result_s.begin() + count);
+	}
+	return result_s;
 }
 
 
@@ -181,12 +250,14 @@ void inToPostfix(const char* infix, char* postfix)
 	case '(':              // 運算子堆疊 
 		stack[++top] = infix[i];
 		break;
-	case '+': case '-': case '*': case '/':
+	case '+': case '-': case '*': case '/':case'!':case'^':
 		while (priority(stack[top]) >= priority(infix[i]))
 		{
+			postfix[j++] = ' ';
 			postfix[j++] = stack[top--];
 		}
 		stack[++top] = infix[i]; // 存入堆疊 
+		postfix[j++] = ' ';
 		break;
 	case ')':
 		while (stack[top] != '(')
@@ -200,6 +271,7 @@ void inToPostfix(const char* infix, char* postfix)
 	}
 	while (top > 0)
 	{
+		postfix[j++] = ' ';
 		postfix[j++] = stack[top--];
 	}
 }
