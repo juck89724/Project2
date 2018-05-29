@@ -5,11 +5,13 @@
 #include <vector>
 using namespace std;
 
+#define MAX 10000
+
 void inToPostfix(const char* infix, char* postfix);
 int priority(char); // 運算子優先權
 bool check(string &s);
-string getResultString(string result_s);
 
+string getResultString(string result_s);
 string NumberSubtraction(string s1, string s2);
 string NumberMultiplication(string s1, string s2);
 string NumberAddition(string s1, string s2);
@@ -65,4 +67,5 @@ private:
 	string calculate = "";
 	string name = "";
 };
+
 int big_compare(NumberObject a, NumberObject b);

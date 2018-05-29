@@ -9,8 +9,8 @@ using namespace std;
 
 #define MAX 10000
 
-vector<NumberObject*> num;
 NumberObject* calculateNumber(string line);
+vector<NumberObject*> num;
 
 int main()
 {
@@ -32,10 +32,13 @@ int main()
 		}
 		else
 		{
-			calculateNumber(line);
+			NumberObject result = *calculateNumber(line);
+			cout << result << endl;
+			num.clear();
 		}
 	}
 }
+
 
 NumberObject* calculateNumber(string line)
 {
@@ -125,10 +128,10 @@ NumberObject* calculateNumber(string line)
 		}
 	}
 
+	text.clear();
 	if (num.size() == 1)
 	{
 		return num[0];
 	}
-	text.clear();
-	num.clear();
+	
 }
