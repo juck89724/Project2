@@ -48,16 +48,50 @@ NumberObject::~NumberObject()
 
 NumberObject NumberObject::operator+(NumberObject &Number2)
 {
-	string newDenominator;
-	string newNumberator1;
-	string newNumberator2;
+	string newDenominator = NumberMultiplication(denominator, Number2.denominator);
+	string newNumberator1 = NumberMultiplication(numberator, Number2.denominator);
+	string newNumberator2 = NumberMultiplication(denominator, Number2.numberator);
 	string addition;
 	if ((sign == "-" && Number2.sign == "-") || (sign == "" && Number2.sign == ""))
-	{
-		newDenominator = NumberMultiplication(denominator, Number2.denominator);
-		newNumberator1 = NumberMultiplication(numberator, Number2.denominator);
-		newNumberator2 = NumberMultiplication(denominator, Number2.numberator);
 		addition = sign + NumberAddition(newNumberator1, newNumberator2);
+	else if (sign == "" && Number2.sign == "-")
+	{
+		if (big_compare(*this, Number2) >= 0)
+			addition = NumberSubtraction(newNumberator1, newNumberator2);
+		else
+			addition = "-" + NumberSubtraction(newNumberator2, newNumberator1);
+	}
+	else if (sign == "-" && Number2.sign == "")
+	{
+		if (big_compare(*this, Number2) > 0)
+			addition = "-" + NumberSubtraction(newNumberator1, newNumberator2);
+		else
+			addition = NumberSubtraction(newNumberator2, newNumberator1);
+	}
+	return NumberObject(addition, newDenominator);
+}
+
+NumberObject NumberObject::operator-(NumberObject & Number2)
+{
+	string newDenominator = NumberMultiplication(denominator, Number2.denominator);
+	string newNumberator1 = NumberMultiplication(numberator, Number2.denominator);
+	string newNumberator2 = NumberMultiplication(denominator, Number2.numberator);
+	string addition;
+	if ((sign == "" && Number2.sign == "-") || (sign == "-" && Number2.sign == ""))
+		addition = sign + NumberAddition(newNumberator1, newNumberator2);
+	else if (sign == "" && Number2.sign == "")
+	{
+		if (big_compare(*this, Number2) >= 0)
+			addition = NumberSubtraction(newNumberator1, newNumberator2);
+		else
+			addition = "-" + NumberSubtraction(newNumberator2, newNumberator1);
+	}
+	else if (sign == "-" && Number2.sign == "-")
+	{
+		if (big_compare(*this, Number2) > 0)
+			addition = "-" + NumberSubtraction(newNumberator1, newNumberator2);
+		else
+			addition = NumberSubtraction(newNumberator2, newNumberator1);
 	}
 	return NumberObject(addition, newDenominator);
 }
@@ -84,43 +118,75 @@ NumberObject NumberObject::operator/(NumberObject & Number2)
 NumberObject plus2("2");
 NumberObject NumberObject::operator^(NumberObject & Number2)
 {
-	Number2 = Number2 * plus2;
+	if (Number2.denominator != "1")
+	{
+		Number2 = Number2 * plus2;
+	}
 	long long int l= Number2.getInteger();
 	NumberObject result("1");
 	for (int i = 0; i < l; i++)
 	{
 		result = result * (*this);
 	}
+	if (Number2.denominator != "1")
+	{
+		NumberObject x("1", "1");
+		for (int i = 0; i < 100; i++)//誤差為小數點後一百位
+		{
+			x.denominator += "0";
+		}
+		NumberObject high("1");
+		NumberObject low("1");
+		NumberObject one("1");
+		NumberObject zero("0");
+		NumberObject two("10", "5");
 
-	NumberObject x ("1");
-	for (int i = 0; i < 100; i++)//誤差為小數點後一百位
-	{
-		x.denominator + "0";
-	}
-	NumberObject high;
-	NumberObject low;
-	NumberObject one("1");
-	NumberObject zero("0");
-	if (big_compare(result,one) < 0) 
-	{
-		low = zero; 
-		high = one;  // 若 0 < x < 1 則其平方根必然介於 0 與 1之間。
-	}
-	else 
-	{
-		low = one; 
-		high = result;  // 若 x > 1 , 則其平方根必然介於 1 與 x 之間。
-	}
-	while (big_compare(high - low,x) > 0)  // 不斷逼近，直到範圍夠小為止。
-	{
-		NumberObject mid = (low + high) / plus2;
-		if (big_compare(mid*mid,x) > 0)          // 解小於 mid , 將上限調為 mid
-			high = mid;
+
+		if (big_compare(result, zero) < 0)
+		{
+			cout << "Error";
+		}
+		else if (big_compare(result, one) < 0)
+		{
+			low = zero;
+			high = one;  // 若 0 < result < 1 則其平方根必然介於 0 與 1之間。
+		}
 		else
-			low = mid;              // 解大於 mid , 將下限調為 mid
-	}
+		{
+			low = one;
+			high = result;  // 若 result > 1 , 則其平方根必然介於 1 與 result 之間。
+		}
+		while (big_compare(high - low, x) > 0)  // 不斷逼近，直到範圍夠小為止。
+		{
+			NumberObject mid = (high + low) / two;
+			while (mid.denominator.size()>101)
+			{
+				mid.numberator.pop_back();
+				mid.denominator.pop_back();
+			}
+			cout << mid.numberator << "/" << mid.denominator << endl;
+			if (big_compare(mid*mid, result) > 0)          // 解小於 mid , 將上限調為 mid
+			{
+				high = mid;
+				//cout << high.numberator << endl;
+			}
+			else
+			{
+				low = mid; // 解大於 mid , 將下限調為 mid
 
-	return NumberObject(low.numberator,low.denominator);
+			}
+		}
+		if (Number2.getSign() == "-")
+			return NumberObject(low.denominator, low.numberator);
+		return NumberObject(low.numberator, low.denominator);
+	}
+	return NumberObject(result.numberator,result.denominator);
+}
+
+NumberObject NumberObject::factorial()
+{
+	
+	return NumberObject();
 }
 
 bool check(string &s)
@@ -135,9 +201,7 @@ bool check(string &s)
 
 string NumberMultiplication(string s1, string s2)
 {
-	int size = s1.size() + s2.size() - 1;
-	if ((s1[0] - '0')*(s2[0] - '0') >= 10)
-		size++;
+	int size = s1.size() + s2.size()+1;
 	int *result = new int[size] { 0 };
 	for (int i = 0; i < s1.size(); i++)
 	{
@@ -159,14 +223,17 @@ string NumberMultiplication(string s1, string s2)
 	string result_s = ss.str();
 	ss.clear();
 	reverse(result_s.begin(), result_s.end());
+	count = 0;
+	while (result_s[count] == '0' && result_s.size()>1)
+	{
+		result_s.erase(result_s.begin() + count);
+	}
 	return result_s;
 }
 
 string NumberAddition(string s1, string s2)
 {
-	int size = fmax(s1.size(), s2.size());
-	if ((s1[0] - '0') + (s2[0] - '0') >= 10)
-		size++;
+	int size = fmax(s1.size(), s2.size())+1;
 	int counter = 0;
 	int *result = new int[size] { 0 };
 	int s1_count = s1.size() - 1, s2_count = s2.size() - 1;
@@ -199,13 +266,54 @@ string NumberAddition(string s1, string s2)
 	string result_s = ss.str();
 	ss.clear();
 	reverse(result_s.begin(), result_s.end());
+	count = 0;
+	while (result_s[count] == '0' && result_s.size()>1)
+	{
+		result_s.erase(result_s.begin() + count);
+	}
+	return result_s;
+}
+string NumberSubtraction(string s1, string s2)
+{
+	int size = s1.size();
+	int counter = 0;
+	int *result = new int[size] { 0 };
+	int s1_count = s1.size() - 1, s2_count = s2.size() - 1;
+	int number1, number2;
+	while (counter < size)
+	{
+		if (s1_count >= 0)
+			number1 = (s1[s1_count] - '0');
+		if (s2_count >= 0)
+			number2 = (s2[s2_count] - '0');
+		result[counter] = number1 - number2;
+		s1_count -= 1; s2_count -= 1;
+		number1 = 0; number2 = 0;
+		counter++;
+	}
+	int count = 0;
+	stringstream ss;
+	while (count < size)
+	{
+		if (result[count] < 0)
+		{
+			result[count + 1] -= 1;
+			result[count] += 10;
+		}
+		ss << result[count];
+		count++;
+	}
+	string result_s = ss.str();
+	ss.clear();
+	reverse(result_s.begin(), result_s.end());
+	count = 0;
+	while (result_s[count] == '0' && result_s.size()>1)
+	{
+		result_s.erase(result_s.begin() + count);
+	}
 	return result_s;
 }
 
-string NumberSubtraction(string s1, string s2)
-{
-	return string();
-}
 
 
 void inToPostfix(const char* infix, char* postfix)

@@ -13,8 +13,8 @@ vector<NumberObject*> num;
 int main()
 {
 	string line;
-	Integer i1("2");
-	Decimal d1("5");
+	Integer i1("1024");
+	Decimal d1("2.5");
 	NumberObject n1 = i1 ^ d1;
 	while (getline(cin, line))
 	{
