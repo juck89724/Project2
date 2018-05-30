@@ -41,7 +41,7 @@ public:
 					times = times - one;
 					d = p * times;
 					mod = (nmod - d).getNumberator();
-					if (times.getNumberator() != "0")
+					if (times.getNumberator() != "0" && !c)
 						c = true;
 					if (c)
 						result+= times.getNumberator();
@@ -62,14 +62,16 @@ public:
 			string result;
 			string num = getNumberator();
 			bool c = false;
+			bool b = false;
 			string mod;
 			for (int i = 0; i < num.size(); i++)
 			{
 				mod += num[i];
 				NumberObject nmod(mod);
 				NumberObject d(getDenominator());
-				if (mod.size() >= getDenominator().size())
+				if (mod.size() >= getDenominator().size() || b)
 				{
+					b = true;
 					NumberObject p(getDenominator());
 					NumberObject times("1");
 					NumberObject one("1");
@@ -81,7 +83,7 @@ public:
 					times = times - one;
 					d = p * times;
 					mod = (nmod - d).getNumberator();
-					if (times.getNumberator() != "0")
+					if (times.getNumberator() != "0" && !c)
 						c = true;
 					if (c)
 						result += times.getNumberator();

@@ -30,7 +30,7 @@ public:
 	NumberObject operator^(NumberObject &Number2);
 	friend ostream& operator<<(ostream&, NumberObject&);
 	NumberObject factorial();
-	//NumberObject operator=(NumberObject Number2);
+	NumberObject operator=(NumberObject Number2);
 
 	virtual void print() { cout << "this is NumberObject"; };
 	long long int getInteger()
@@ -47,6 +47,9 @@ public:
 		}
 		return result / d;
 	};
+	bool isInteger();
+	void ChangeInteger();
+	
 
 	string getName() { return name; };
 	string getNumberator() { return numberator; };

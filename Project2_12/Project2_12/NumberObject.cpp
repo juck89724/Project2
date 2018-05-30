@@ -102,7 +102,11 @@ NumberObject NumberObject::operator*(NumberObject &Number2)
 	if ((checkSign(*this) && checkSign(Number2)) || (!checkSign(*this) && !checkSign(Number2)))
 		newSign = "";
 	string newDenominator = NumberMultiplication(denominator, Number2.denominator);
-	string newNumberator = newSign + NumberMultiplication(numberator, Number2.numberator);
+	string newNumberator;
+	if (numberator == "0" || Number2.numberator == "0")
+		newNumberator = "0";
+	else
+		newNumberator = newSign + NumberMultiplication(numberator, Number2.numberator);
 	return NumberObject(newNumberator, newDenominator);
 }
 
@@ -118,20 +122,30 @@ NumberObject NumberObject::operator/(NumberObject & Number2)
 NumberObject plus2("2");
 NumberObject NumberObject::operator^(NumberObject & Number2)
 {
-	if (Number2.denominator != "1")
+	int notInteger = false;
+	if (!Number2.isInteger())
+	{
+		notInteger = true;
 		Number2 = Number2 * plus2;
-	long long int l = Number2.getInteger();
-	NumberObject result("1");
-	for (int i = 0; i < l; i++)
-		result = result * (*this);
+	}
 	if (Number2.denominator != "1")
+		Number2.ChangeInteger();
+	NumberObject result("1");
+	NumberObject times("1");
+	NumberObject one("1");
+
+	while (big_compare(times, Number2) <= 0)
+	{
+		result = result * (*this);
+		times = times + one;
+	}
+	if (notInteger)
 	{
 		NumberObject x("1", "1");
 		for (int i = 0; i < 100; i++)//誤差為小數點後一百位
 			x.denominator += "0";
 		NumberObject high("1");
 		NumberObject low("1");
-		NumberObject one("1");
 		NumberObject zero("0");
 		NumberObject two("10", "5");
 
@@ -170,7 +184,7 @@ NumberObject NumberObject::operator^(NumberObject & Number2)
 		return NumberObject(low.numberator, low.denominator);
 	}
 	if (Number2.getSign() == "-")
-		return NumberObject(result.denominator,result.numberator);
+		return NumberObject(result.denominator, result.numberator);
 	return NumberObject(result.numberator, result.denominator);
 }
 
@@ -180,13 +194,102 @@ NumberObject NumberObject::factorial()
 	NumberObject result("1");
 	NumberObject x("1");
 	NumberObject one("1");
-	for (long long int i = 1; i <= this->getInteger(); i++)
+	this->ChangeInteger();
+	while (big_compare(x, *this) <= 0)
 	{
 		result = result * x;
 		x = x + one;
 	}
 
 	return NumberObject(result.numberator, result.denominator);
+}
+
+NumberObject NumberObject::operator=(NumberObject Number2)
+{
+	this->numberator = Number2.numberator;
+	this->calculate = Number2.calculate;
+	this->name = Number2.name;
+	this->sign = Number2.sign;
+	this->denominator = Number2.denominator;
+	return *this;
+}
+
+bool NumberObject::isInteger()
+{
+	if (getDenominator() == "1")
+		return true;
+	string num = getNumberator();
+	bool c = false;
+	bool b = false;
+	string mod;
+
+	for (int i = 0; i < num.size(); i++)
+	{
+		if (mod != "0")
+			mod += num[i];
+		else
+			mod = num[i];
+		NumberObject nmod(mod);
+		NumberObject d(getDenominator());
+		if (mod.size() >= getDenominator().size() || b)
+		{
+			b = true;
+			NumberObject p(getDenominator());
+			NumberObject times("1");
+			NumberObject one("1");
+			while (big_compare(nmod, d) >= 0)
+			{
+				times = times + one;
+				d = p * times;
+			}
+			times = times - one;
+			d = p * times;
+			mod = (nmod - d).getNumberator();
+		}
+	}
+	if (mod == "0")
+		return true;
+	return false;
+}
+
+void NumberObject::ChangeInteger()
+{
+	if (getDenominator() == "1")
+		return;
+	string num = getNumberator();
+	bool c = false;
+	bool b = false;
+	string mod;
+	NumberObject times("1");
+	for (int i = 0; i < num.size(); i++)
+	{
+		if (mod != "0")
+			mod += num[i];
+		else
+			mod = num[i];
+		NumberObject nmod(mod);
+		NumberObject d(getDenominator());
+		times.numberator = "1";
+		if (mod.size() >= getDenominator().size() || b)
+		{
+			b = true;
+			NumberObject p(getDenominator());
+			NumberObject one("1");
+			while (big_compare(nmod, d) >= 0)
+			{
+				times = times + one;
+				d = p * times;
+			}
+			times = times - one;
+			d = p * times;
+			mod = (nmod - d).getNumberator();
+		}
+	}
+	if (mod == "0")
+	{
+		setNumberator(times.numberator);
+		setDenominator(times.denominator);
+	}
 }
 
 bool check(string &s)
@@ -264,19 +367,24 @@ ostream & operator<<(ostream &output, NumberObject &number)
 {
 	output << number.sign;
 	if (number.getName() == "Integer")
-		output << number.numberator;
+		output << number.numberator << endl;
 	else
 	{
 		string num = number.numberator;
-		bool c=false;
+		bool c = false;
+		bool b = false;
 		string mod;
 		for (int i = 0; i < num.size(); i++)
 		{
-			mod += num[i];
+			if (mod != "0")
+				mod += num[i];
+			else
+				mod = num[i];
 			NumberObject nmod(mod);
 			NumberObject d(number.denominator);
-			if (mod.size() >= number.denominator.size())
+			if (mod.size() >= number.denominator.size() || b)
 			{
+				b = true;
 				NumberObject p(number.denominator);
 				NumberObject times("1");
 				NumberObject one("1");
@@ -288,9 +396,9 @@ ostream & operator<<(ostream &output, NumberObject &number)
 				times = times - one;
 				d = p * times;
 				mod = (nmod - d).numberator;
-				if (times.numberator != "0")
+				if (times.numberator != "0" && !c)
 					c = true;
-				if(c)
+				if (c)
 					output << times.getNumberator();
 			}
 		}
@@ -423,7 +531,7 @@ int big_compare(NumberObject a, NumberObject b)
 		if (ad.length() < bd.length())
 		{
 			a.setDenominator(a.getDenominator() + "0");
-			if(a.getNumberator()!="0")
+			if (a.getNumberator() != "0")
 				a.setNumberator(a.getNumberator() + "0");
 		}
 		if (ad.length() > bd.length())
