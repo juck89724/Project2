@@ -235,6 +235,7 @@ bool NumberObject::isInteger()
 		{
 			b = true;
 			NumberObject p(getDenominator());
+
 			NumberObject times("1");
 			NumberObject one("1");
 			while (big_compare(nmod, d) >= 0)

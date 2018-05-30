@@ -13,6 +13,7 @@ using namespace std;
 NumberObject* calculateNumber(string line);
 vector<NumberObject*> num;
 map<string, NumberObject*> valueMap;
+void checkPower(string & line);
 
 int main()
 {
@@ -162,6 +163,10 @@ NumberObject* calculateNumber(string line)
 	int counter = 0;
 	stringstream ss;
 	string s;
+
+	bool check = false;
+	int count = 0;
+	checkPower(line);
 	for (int i = 0; i < line.size(); i++)
 	{
 		if (line[i] == '+' || line[i] == '-')
@@ -175,8 +180,8 @@ NumberObject* calculateNumber(string line)
 					if (c != '(')
 					{
 						line.insert(line.begin() + i, '(');
-						bool check = false;
-						int count = 0;
+						check = false;
+						count = 0;
 						int j = 0;
 						for (j = i + 3; j < line.size(); j++)
 						{
@@ -188,10 +193,7 @@ NumberObject* calculateNumber(string line)
 								if (line[j] == ')') count--;
 							}
 							if (((priority(line[j]) < 3 && priority(line[j]) > 0 && check) || line[j] == ')') && count < 1)
-							{
-
 								break;
-							}
 						}
 						line.insert(line.begin() + j, ')');
 					}
@@ -321,5 +323,61 @@ NumberObject* calculateNumber(string line)
 	if (num.size() == 1)
 	{
 		return num[0];
+	}
+}
+
+void checkPower(string & line)
+{
+	bool check = false;
+	int count = 0;
+	bool isTime = false;
+	int many = 0;
+	int checkleft = 0;
+	for (int i = 0; i < line.size(); i++)
+	{
+		char c = line[i];
+		if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^' || c == '(' || c == ')')
+		{
+			if ((c == ')'|| c == '+' || c == '-' || c == '*' || c == '/')&&checkleft <1)
+			{
+				for (int j = 0; j < many; j++)
+					line.insert(line.begin() + i, ')');
+				many = 0;
+				isTime = false;
+			}
+			if (isTime)
+			{
+				if (line[i] == '(')checkleft++;
+				if (line[i] == ')')checkleft--;
+			}
+			if (c == '^')
+			{
+				check = true;
+				int j;
+				for (j = i - 1; j > 0; j--)
+				{
+					if (priority(line[j]) == 0)
+						isTime = true;
+					if (isTime)
+					{
+						if (line[j] == ')') count++;
+						if (line[j] == '(') count--;
+					}
+					if (((priority(line[j]) < 4 && priority(line[j]) > 0 && check) || line[j] == '(') && count < 1)
+						break;
+				}
+				if(j!=0)
+					line.insert(line.begin() + j + 1, '(');
+				else
+					line.insert(line.begin() + j, '(');
+				many++;
+				i++;
+			}
+		}
+	}
+	if (many != 0)
+	{
+		for (int j = 0; j < many; j++)
+			line.push_back(')');
 	}
 }
