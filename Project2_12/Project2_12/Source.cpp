@@ -14,7 +14,7 @@ int main()
 {
 	string line;
 	Integer i1("2");
-	Decimal d1("120");
+	Decimal d1("5");
 	NumberObject n1 = i1 ^ d1;
 	NumberObject pp = d1.factorial();
 	while (getline(cin, line))

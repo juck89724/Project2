@@ -188,10 +188,11 @@ NumberObject NumberObject::factorial()
 	NumberObject result("1");
 	NumberObject x("1");
 	NumberObject one("1");
-	for (long long int i = 1;i <= this->getInteger(); i++)
+	NumberObject zero("0");
+	while(big_compare(*this,zero)> 0)
 	{
-		result = result * x;
-		x = x + one ;
+		result = result * (*this);
+		*this= *this - one ;
 	}
 	
 	return NumberObject(result.numberator, result.denominator);
