@@ -133,7 +133,14 @@ NumberObject NumberObject::operator^(NumberObject & Number2)
 	NumberObject result("1");
 	NumberObject times("1");
 	NumberObject one("1");
-
+	NumberObject Test;
+	Test = *this;
+	if (Test.isInteger())
+	{
+		Test.ChangeInteger();
+	}
+	if (big_compare(Test, one) == 0)
+		return NumberObject("1","1");
 	while (big_compare(times, Number2) <= 0)
 	{
 		result = result * (*this);
@@ -150,9 +157,10 @@ NumberObject NumberObject::operator^(NumberObject & Number2)
 		NumberObject two("10", "5");
 
 
-		if (big_compare(result, zero) < 0)
+		if (big_compare(result, one) == 0)
 		{
-			cout << "Error";
+			low = one;
+			high = one;
 		}
 		else if (big_compare(result, one) < 0)
 		{
@@ -366,11 +374,15 @@ string NumberAddition(string s1, string s2)
 
 ostream & operator<<(ostream &output, NumberObject &number)
 {
-	output << number.sign;
 	if (number.getName() == "Integer")
+	{
+		if (number.numberator != "0")
+			output << number.sign;
 		output << number.numberator << endl;
+	}
 	else
 	{
+		output << number.sign;
 		string num = number.numberator;
 		bool c = false;
 		bool b = false;

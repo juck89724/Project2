@@ -22,6 +22,9 @@ int main()
 	cout << "請入運算式:" << endl;
 	while (getline(cin, line))
 	{
+		line.substr(0, 3);
+		if (line.size() < 1)
+			continue;
 		if (line.substr(0, 3) == "Set")
 		{
 			map<string, NumberObject*>::iterator it;
@@ -121,37 +124,40 @@ int main()
 			{
 				text.push_back(s);
 			}
-			map<string, NumberObject*>::iterator it;
-			it = valueMap.find(text[0]);
-			if (it != valueMap.end() && line.find("=") != -1)
+			if (text.size() > 0)
 			{
-				string value;
-				value = line.substr(line.find("=") + 2);
-				NumberObject *result = calculateNumber(value);
-				num.clear();
-				if (result != NULL)
+				map<string, NumberObject*>::iterator it;
+				it = valueMap.find(text[0]);
+				if (it != valueMap.end() && line.find("=") != -1)
 				{
-					if (it->second->getName() == "Integer")
+					string value;
+					value = line.substr(line.find("=") + 2);
+					NumberObject *result = calculateNumber(value);
+					num.clear();
+					if (result != NULL)
 					{
-						NumberObject*pointer = new Integer(result->getSign() + result->getNumberator(), result->getDenominator());
-						it->second = pointer;
-					}
-					else
-					{
-						NumberObject*pointer = new Decimal(result->getSign() + result->getNumberator(), result->getDenominator());
-						it->second = pointer;
+						if (it->second->getName() == "Integer")
+						{
+							NumberObject*pointer = new Integer(result->getSign() + result->getNumberator(), result->getDenominator());
+							it->second = pointer;
+						}
+						else
+						{
+							NumberObject*pointer = new Decimal(result->getSign() + result->getNumberator(), result->getDenominator());
+							it->second = pointer;
+						}
 					}
 				}
-			}
-			else
-			{
-				NumberObject *result = calculateNumber(line);
-				if (result != NULL)
+				else
 				{
-					cout <<endl<< "運算結果：" << endl;
-					cout << *result ;
+					NumberObject *result = calculateNumber(line);
+					if (result != NULL)
+					{
+						cout << endl << "運算結果：" << endl;
+						cout << *result;
+					}
+					num.clear();
 				}
-				num.clear();
 			}
 			//upup is judge variable 改變數值
 		}
@@ -169,7 +175,7 @@ NumberObject* calculateNumber(string line)
 
 	bool check = false;
 	int count = 0;
-	checkPower(line);
+	
 	for (int i = 0; i < line.size(); i++)
 	{
 		if (line[i] == '+' || line[i] == '-')
@@ -198,7 +204,10 @@ NumberObject* calculateNumber(string line)
 							if (((priority(line[j]) < 3 && priority(line[j]) > 0 && check) || line[j] == ')') && count < 1)
 								break;
 						}
-						line.insert(line.begin() + j, ')');
+						if(j < line.size())
+							line.insert(line.begin() + j, ')');
+						else
+							line.push_back(')');
 					}
 				}
 			}
@@ -206,7 +215,7 @@ NumberObject* calculateNumber(string line)
 				line.insert(line.begin(), '0');
 		}
 	}
-
+	checkPower(line);
 	inToPostfix(line.c_str(), postfix);
 	ss << postfix;
 	while (ss >> s)
@@ -341,7 +350,7 @@ void checkPower(string & line)
 		char c = line[i];
 		if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^' || c == '(' || c == ')')
 		{
-			if ((c == ')'|| c == '+' || c == '-' || c == '*' || c == '/')&&checkleft <1)
+			if ((c == ')'|| c == '+' || c == '-' || c == '*' || c == '/') && checkleft <1)
 			{
 				for (int j = 0; j < many; j++)
 					line.insert(line.begin() + i, ')');
@@ -373,8 +382,9 @@ void checkPower(string & line)
 					line.insert(line.begin() + j + 1, '(');
 				else
 					line.insert(line.begin() + j, '(');
-				many++;
+				isTime=true;
 				i++;
+				many++;
 			}
 		}
 	}
