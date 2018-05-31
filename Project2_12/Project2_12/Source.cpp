@@ -19,6 +19,7 @@ int main()
 {
 	string line;
 	//NumberObject x = i1 ^ d1;
+	cout << "請入運算式:" << endl;
 	while (getline(cin, line))
 	{
 		if (line.substr(0, 3) == "Set")
@@ -107,9 +108,7 @@ int main()
 				}
 			}
 			else
-			{
 				cout << "格式錯誤" << endl;
-			}
 		}
 		else
 		{
@@ -148,11 +147,15 @@ int main()
 			{
 				NumberObject *result = calculateNumber(line);
 				if (result != NULL)
-					cout << *result << endl;
+				{
+					cout <<endl<< "運算結果：" << endl;
+					cout << *result ;
+				}
 				num.clear();
 			}
 			//upup is judge variable 改變數值
 		}
+		cout <<endl<< "請入運算式:" << endl;
 	}
 }
 
